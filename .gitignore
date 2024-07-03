@@ -1,0 +1,7 @@
+node_modules
+tokens
+.env
+.env.backup
+dist
+store_info.json
+auth_info
