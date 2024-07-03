@@ -7,7 +7,7 @@
     "config": "node ./setup.js",
     "dev": "tsup src/index.ts --watch --onSuccess 'node dist/index.cjs'",
     "build": "tsup src/index.ts --no-splitting",
-    "start": "pnpm build && pm2 start dist/index.cjs --name zap-gpt --no-daemon",
+    "start": "npm run build && pm2 start dist/index.cjs --name zap-gpt --no-daemon",
     "stop": "npx pm2 delete zap-gpt",
     "ob": "javascript-obfuscator dist/index.js",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org zap-gpt --project node ./dist/index.cjs && sentry-cli sourcemaps upload --org zap-gpt --project node ./dist/index.cjs"
