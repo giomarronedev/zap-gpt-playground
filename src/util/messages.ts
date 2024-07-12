@@ -1,8 +1,10 @@
 import { type proto } from '@whiskeysockets/baileys';
 
 export function splitMessages(text: string): string[] {
+  // const complexPattern =
+  //   /(http[s]?:\/\/[^\s]+)|(www\.[^\s]+)|([^\s]+@[^\s]+\.[^\s]+)|(["'].*?["'])|(\b\d+\.\s)|(\w+\.\w+)/g;
   const complexPattern =
-    /(http[s]?:\/\/[^\s]+)|(www\.[^\s]+)|([^\s]+@[^\s]+\.[^\s]+)|(["'].*?["'])|(\b\d+\.\s)|(\w+\.\w+)/g;
+  /(http[s]?:\/\/[^\s]+)|(www\.[^\s]+)|([^\s]+@[^\s]+\.[^\s]+)|(["'].*?["'])|(\b\d+\.\s)|(\w+\.\w+)|(Dra\.)/g;
   const placeholders = text.match(complexPattern) ?? [];
 
   const placeholder = 'PLACEHOLDER_';

@@ -3,6 +3,9 @@ import {
   downloadMediaMessage,
   type proto,
   type WASocket,
+  // MessageType,
+  // MessageOptions,
+  // Mimetype,
 } from '@whiskeysockets/baileys';
 import {
   type MessageProcessingProps,
@@ -17,6 +20,7 @@ import {
   transcriptionImage,
 } from '../services/openai';
 import { handleMessagesUpsert } from '.';
+import fs from 'fs';
 
 const sentMessageIds = new Set<string>();
 const excludedNumbersByIntervention = new Set<string>();
@@ -225,6 +229,17 @@ export async function processNonTextMessage({
   return false;
 }
 
+async function sendLocalImage(sock: any, chatId: any, imagePath: any) {
+  // Lendo o arquivo de imagem como buffer
+  const imageBuffer = fs.readFileSync(imagePath);
+
+  // Enviando a imagem como buffer
+  await sock.sendMessage(chatId, {
+    image: imageBuffer,
+    caption: 'Aqui está sua imagem!', // opcional: você pode adicionar uma legenda à imagem
+  });
+}
+
 export async function sendMessage({
   sock,
   messageToSend,
@@ -258,9 +273,17 @@ export async function sendMessage({
   await delay(dynamicDelay);
   await sock.sendPresenceUpdate('paused', chatId);
   console.log('Mensagem enviada: ', trimmedMessage);
+
   const result = await sock.sendMessage(chatId, {
     text: trimmedMessage,
   });
+  
+  if (
+    trimmedMessage ==
+    'Ok! Vou enviar algumas fotos para você conhecer um pouco mais o nosso trabalho, ok?'
+  ) {
+    sendLocalImage(sock, chatId, '../assets/oto1.jpg');
+  }
 
   lastSentMessageWarningByChatId.set(chatId, trimmedMessage);
   if (result?.key.id) {
