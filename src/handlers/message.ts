@@ -3,9 +3,6 @@ import {
   downloadMediaMessage,
   type proto,
   type WASocket,
-  // MessageType,
-  // MessageOptions,
-  // Mimetype,
 } from '@whiskeysockets/baileys';
 import {
   type MessageProcessingProps,
@@ -20,7 +17,7 @@ import {
   transcriptionImage,
 } from '../services/openai';
 import { handleMessagesUpsert } from '.';
-import fs from 'fs';
+import * as fs from 'fs'
 
 const sentMessageIds = new Set<string>();
 const excludedNumbersByIntervention = new Set<string>();
@@ -229,15 +226,16 @@ export async function processNonTextMessage({
   return false;
 }
 
-async function sendLocalImage(sock: any, chatId: any, imagePath: any) {
-  // Lendo o arquivo de imagem como buffer
-  const imageBuffer = fs.readFileSync(imagePath);
+async function sendImage(sock: WASocket, chatId: string, imagePath: string): Promise<void> {
+  const buffer = fs.readFileSync(imagePath);
+  // const base64Image = buffer.toString('base64');
 
-  // Enviando a imagem como buffer
-  await sock.sendMessage(chatId, {
-    image: imageBuffer,
-    caption: 'Aqui está sua imagem!', // opcional: você pode adicionar uma legenda à imagem
-  });
+  const messageContent = {
+    image: buffer
+  };
+
+  await sock.sendMessage(chatId, messageContent);
+  console.log('Imagem enviada: ', imagePath);
 }
 
 export async function sendMessage({
@@ -267,23 +265,25 @@ export async function sendMessage({
     return;
   }
 
+  if (trimmedMessage == "São esses os resultados que você procura?") {
+    // const imagePath = 'src/assets/oto/Oto3.jpg'; // Substitua com o caminho correto da imagem
+    await sendImage(sock, chatId, 'src/assets/oto/Oto0.jpg');
+    await sendImage(sock, chatId, 'src/assets/oto/Oto1.jpg');
+    await sendImage(sock, chatId, 'src/assets/oto/Oto2.jpg');
+    await sendImage(sock, chatId, 'src/assets/oto/Oto3.jpg');
+    await sendImage(sock, chatId, 'src/assets/oto/Oto4.jpg');
+    console.log("ENVIANDO IMAGEM------------------")
+  }
+
   await sock.sendPresenceUpdate('composing', chatId);
   const dynamicDelay = messageToSend.length * 50;
 
   await delay(dynamicDelay);
   await sock.sendPresenceUpdate('paused', chatId);
   console.log('Mensagem enviada: ', trimmedMessage);
-
   const result = await sock.sendMessage(chatId, {
     text: trimmedMessage,
   });
-  
-  if (
-    trimmedMessage ==
-    'Ok! Vou enviar algumas fotos para você conhecer um pouco mais o nosso trabalho, ok?'
-  ) {
-    sendLocalImage(sock, chatId, '../assets/oto1.jpg');
-  }
 
   lastSentMessageWarningByChatId.set(chatId, trimmedMessage);
   if (result?.key.id) {
